@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="80">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3c72;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2a5298;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    
+    <linearGradient id="statusRunning">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E7D32;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="statusStopped">
+      <stop offset="0%" style="stop-color:#f44336;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c62828;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="statusWarning">
+      <stop offset="0%" style="stop-color:#ff9800;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ef6c00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" rx="12" ry="12" fill="url(#bgGradient)" filter="url(#shadow)"/>
+  
+  <!-- Left side - GoLV Logo -->
+  <rect x="20" y="15" width="50" height="50" rx="8" fill="white" fill-opacity="0.1"/>
+  <text x="45" y="45" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">VM</text>
+  <text x="45" y="60" font-family="Arial, sans-serif" font-size="10" fill="#a0c8ff" text-anchor="middle">GoLV</text>
+  
+  <!-- VM Info Section -->
+  <g transform="translate(90, 25)">
+    <!-- VM Name -->
+    <text x="0" y="18" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">
+      <tspan id="vmName">ubuntu-server-01</tspan>
+    </text>
+    
+    <!-- VM Type -->
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="12" fill="#e3f2fd">
+      Type: <tspan id="vmType" font-weight="bold">Ubuntu Server</tspan>
+      <tspan x="180" y="35">v<tspan id="vmVersion">22.04</tspan></tspan>
+    </text>
+    
+    <!-- VM ID -->
+    <text x="0" y="50" font-family="Monaco, monospace" font-size="10" fill="#bbdefb">
+      ID: <tspan id="vmId">golv_abc123</tspan>
+    </text>
+  </g>
+  
+  <!-- Status Badge -->
+  <g transform="translate(300, 25)">
+    <!-- Status background -->
+    <rect width="80" height="30" rx="15" fill="url(#statusRunning)" filter="url(#shadow)"/>
+    
+    <!-- Status text -->
+    <text x="40" y="20" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white" text-anchor="middle">
+      <tspan id="statusText">RUNNING</tspan>
+    </text>
+    
+    <!-- Status icon -->
+    <circle cx="15" cy="15" r="5" fill="#ffffff" fill-opacity="0.9">
+      <animate attributeName="r" values="5;3;5" dur="2s" repeatCount="indefinite" begin="0s" />
+      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite" begin="0s" />
+    </circle>
+  </g>
+  
+  <!-- API Info -->
+  <text x="20" y="75" font-family="Arial, sans-serif" font-size="8" fill="#90caf9" text-anchor="start">
+    API: golv.onrender.com • Last updated: <tspan id="updateTime">Just now</tspan>
+  </text>
+</svg>
+
+<style>
+  /* Animation for status updates */
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  #statusText {
+    animation: pulse 3s infinite;
+  }
+</style>
+
+<script type="application/javascript">
+//<![CDATA[
+  // Configuration
+  const API_BASE = "https://golv.onrender.com/api";
+  const VM_ID = "votre_vm_id_ici"; // Remplacez par l'ID de votre VM
+  const UPDATE_INTERVAL = 30000; // Mise à jour toutes les 30 secondes
+  
+  // Statut VM (à remplacer par un appel API réel)
+  const vmData = {
+    name: "Mon Serveur Ubuntu",
+    type: "Ubuntu Server",
+    version: "22.04 LTS",
+    id: VM_ID,
+    status: "running", // running, stopped, warning
+    lastUpdated: new Date().toLocaleTimeString()
+  };
+  
+  // Mettre à jour l'affichage
+  function updateBadge(data) {
+    document.getElementById('vmName').textContent = data.name;
+    document.getElementById('vmType').textContent = data.type;
+    document.getElementById('vmVersion').textContent = data.version;
+    document.getElementById('vmId').textContent = data.id;
+    document.getElementById('statusText').textContent = data.status.toUpperCase();
+    document.getElementById('updateTime').textContent = data.lastUpdated;
+    
+    // Changer la couleur du statut
+    const statusRect = document.querySelector('rect[fill*="status"]');
+    if (statusRect) {
+      if (data.status === 'running') {
+        statusRect.setAttribute('fill', 'url(#statusRunning)');
+      } else if (data.status === 'stopped') {
+        statusRect.setAttribute('fill', 'url(#statusStopped)');
+      } else {
+        statusRect.setAttribute('fill', 'url(#statusWarning)');
+      }
+    }
+  }
+  
+  // Fonction pour récupérer les données de l'API
+  async function fetchVMData() {
+    try {
+      // Exemple de requête à votre API (à adapter selon vos routes)
+      // const response = await fetch(`${API_BASE}/vms/${VM_ID}/status`);
+      // const data = await response.json();
+      
+      // Pour l'instant, on utilise des données simulées
+      const mockData = {
+        name: "Production Server",
+        type: "Ubuntu",
+        version: "22.04 LTS",
+        id: VM_ID,
+        status: "running",
+        lastUpdated: new Date().toLocaleTimeString()
+      };
+      
+      updateBadge(mockData);
+    } catch (error) {
+      console.error('Erreur API:', error);
+      // Afficher une erreur sur le badge
+      updateBadge({
+        name: "Erreur API",
+        type: "N/A",
+        version: "N/A",
+        id: VM_ID,
+        status: "warning",
+        lastUpdated: new Date().toLocaleTimeString()
+      });
+    }
+  }
+  
+  // Initialiser
+  updateBadge(vmData);
+  
+  // Mettre à jour périodiquement
+  setInterval(fetchVMData, UPDATE_INTERVAL);
+  
+  // Mettre à jour immédiatement
+  fetchVMData();
+//]]>
+</script>
