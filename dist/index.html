@@ -2,975 +2,607 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoLV Dashboard - Terminal Sécurisé pour IA</title>
-    
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- CSS Framework -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Toastify Notifications -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    
-    <!-- JSON Viewer -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/json-viewer/1.4.0/json-viewer.min.css">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GoLV - GoPu Inc. Cloud Manager</title>
     <style>
-        /* Gardez TOUT le CSS existant, il est bon */
         :root {
-            --primary: #6d28d9;
-            --primary-dark: #5b21b6;
-            --secondary: #0ea5e9;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --dark: #1e293b;
-            --light: #f8fafc;
-            --terminal-bg: #0f172a;
-            --terminal-text: #e2e8f0;
-            --terminal-green: #10b981;
-            --terminal-yellow: #fbbf24;
-            --terminal-red: #ef4444;
-            --terminal-blue: #3b82f6;
-            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #00ff88;
+            --primary-dim: #00ff8833;
+            --bg: #0f1115;
+            --card-bg: #1a1d24;
+            --text: #ffffff;
+            --text-dim: #8b9bb4;
+            --danger: #ff4757;
+            --border: #2f3542;
+            --glass: rgba(26, 29, 36, 0.8);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; -webkit-font-smoothing: antialiased; }
+
+        /* --- UI COMPONENTS --- */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        /* Header & Nav */
+        header { 
+            position: sticky; top: 0; z-index: 100; 
+            background: var(--glass); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
         }
         
-        [data-theme="dark"] {
-            --light: #1e293b;
-            --dark: #f8fafc;
-            --card-bg: rgba(30, 41, 59, 0.95);
-            --terminal-bg: #0f172a;
-            --terminal-text: #e2e8f0;
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; }
+        .logo svg { height: 30px; width: 30px; fill: var(--primary); }
+        
+        .user-pill { 
+            display: flex; align-items: center; gap: 10px; 
+            background: var(--card-bg); padding: 5px 15px; 
+            border-radius: 20px; border: 1px solid var(--border); font-size: 0.9rem;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+        /* Community Section */
+        .community-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px;
+            margin-bottom: 30px;
         }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-attachment: fixed;
-            color: var(--dark);
-            min-height: 100vh;
-            transition: all 0.3s ease;
+        .comm-card {
+            background: var(--card-bg); padding: 15px; border-radius: 12px;
+            text-align: center; text-decoration: none; color: var(--text);
+            border: 1px solid var(--border); transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
+        .comm-card:active { transform: scale(0.98); background: var(--primary-dim); }
+        .comm-card svg { width: 24px; height: 24px; fill: var(--text-dim); }
+
+        /* Forms */
+        .auth-box, .create-vm-box {
+            background: var(--card-bg); padding: 25px; border-radius: 16px;
+            border: 1px solid var(--border); max-width: 400px; margin: 40px auto;
+        }
+        input, select, textarea {
+            width: 100%; padding: 12px; margin: 8px 0 20px 0;
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); border-radius: 8px; font-size: 16px;
+        }
+        button {
+            width: 100%; padding: 14px; background: var(--primary);
+            color: #000; border: none; border-radius: 8px;
+            font-weight: bold; font-size: 16px; cursor: pointer;
+        }
+        button:disabled { opacity: 0.5; }
+        .secondary-btn { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 10px;}
+
+        /* VM List */
+        .vm-list { display: grid; gap: 15px; }
+        .vm-card {
+            background: var(--card-bg); padding: 20px; border-radius: 12px;
+            border: 1px solid var(--border); position: relative;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .vm-status {
+            width: 10px; height: 10px; border-radius: 50%; background: var(--danger);
+            display: inline-block; margin-right: 8px;
+        }
+        .vm-status.running { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
         
-        /* Gardez TOUT le reste du CSS existant */
-        /* ... */
-        
+        /* Terminal / Window */
+        .window-manager {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg); z-index: 200; flex-direction: column;
+        }
+        .window-header {
+            padding: 15px; background: var(--card-bg); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .terminal {
+            flex: 1; background: #000; padding: 15px; overflow-y: auto;
+            font-family: 'Courier New', monospace; font-size: 14px;
+            color: var(--primary); border-bottom: 1px solid var(--border);
+        }
+        .terminal-output div { margin-bottom: 5px; white-space: pre-wrap; word-break: break-all;}
+        .cmd-input-area {
+            display: flex; padding: 10px; background: var(--card-bg);
+        }
+        .cmd-input-area input { margin: 0; border: none; outline: none; background: transparent; }
+
+        /* Utils */
+        .hidden { display: none !important; }
+        .fab {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--primary); color: #000;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; box-shadow: 0 4px 15px rgba(0,255,136,0.4);
+            cursor: pointer; border: none; z-index: 90;
+        }
+        .error-msg { color: var(--danger); font-size: 0.9rem; margin-bottom: 10px; text-align: center;}
+
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div style="color: white; font-size: 1.2rem;">Connexion à GoLV API...</div>
-    </div>
 
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container-fluid">
-            <div class="logo">
-                <i class="fas fa-server logo-icon"></i>
-                <span>GoLV Dashboard</span>
-            </div>
-            
-            <div class="d-flex align-items-center gap-3">
-                <div class="badge-container" id="serverStatusBadges">
-                    <span class="custom-badge" style="background: #6d28d9; color: white;">
-                        <i class="fas fa-server"></i> <span id="totalVMs">0</span> VMs
-                    </span>
-                    <span class="custom-badge" style="background: #10b981; color: white;">
-                        <i class="fas fa-play"></i> <span id="runningVMs">0</span> Running
-                    </span>
-                    <span class="custom-badge" style="background: #3b82f6; color: white;">
-                        <i class="fas fa-bolt"></i> <span id="apiStatus">Checking...</span>
-                    </span>
-                </div>
-                
-                <button class="btn btn-golv" onclick="toggleTheme()">
-                    <i class="fas fa-moon" id="themeIcon"></i>
-                </button>
-                
-                <div class="dropdown">
-                    <button class="btn btn-golv dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> <span id="usernameDisplay">Non connecté</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Connexion</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="showRegisterModal()"><i class="fas fa-user-plus"></i> Inscription</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
-                    </ul>
-                </div>
+    <div id="toast" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; padding: 10px 20px; border-radius: 20px; z-index: 999; display: none; font-size: 0.9rem;">Notification</div>
+
+    <header>
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
+            </svg>
+            <span>GoLV<span style="color:var(--text-dim); font-size:0.8em; font-weight:normal;"> by gopu.inc</span></span>
+        </div>
+        <div id="user-display" class="user-pill hidden">
+            <span id="username-span">Guest</span>
+            <span onclick="logout()" style="color: var(--danger); cursor: pointer;">✕</span>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div id="view-community">
+            <h2 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-dim);">Nos Communautés</h2>
+            <div class="community-grid">
+                <a href="https://www.threads.net/@mangitukamauricio/post/DSVcsKfDF3k" target="_blank" class="comm-card">
+                    <svg viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm3.25 7.412h-2.115c-.464 0-.84.22-.84.82v.22c-.6-.723-1.32-1.04-2.193-1.04-2.074 0-3.35 1.706-3.35 4.093 0 2.457 1.348 4.085 3.393 4.085 1.127 0 1.902-.51 2.4-1.292.365 1.053 1.237 1.487 2.482 1.487 1.87 0 3.328-1.42 3.328-4.434V6.99h-3.105v6.234c0 1.02-.455 1.632-1.26 1.632-.71 0-1.11-.476-1.11-1.326V9.412zm-3.045 4.366c0 1.054-.51 1.632-1.203 1.632-.67 0-1.12-.553-1.12-1.58 0-1.106.467-1.633 1.146-1.633.68 0 1.177.536 1.177 1.58z" fill="currentColor"/></svg>
+                    <span>Threads</span>
+                </a>
+                <a href="https://discord.gg/qWx5DszrC" target="_blank" class="comm-card">
+                    <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" fill="currentColor"/></svg>
+                    <span>Discord</span>
+                </a>
+                <a href="https://linkedin.com/in/ceoseshell" target="_blank" class="comm-card">
+                    <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" fill="currentColor"/></svg>
+                    <span>LinkedIn</span>
+                </a>
+                <a href="https://github.com/gopu-inc/GoLV-VM" target="_blank" class="comm-card">
+                    <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" fill="currentColor"/></svg>
+                    <span>GitHub</span>
+                </a>
+                <a href="https://twitch.tv/gopuinc" target="_blank" class="comm-card" style="border-color: #9146ff;">
+                   <svg viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z" fill="currentColor"/></svg>
+                   <span>Twitch</span>
+                </a>
             </div>
         </div>
-    </nav>
 
-    <!-- Gardez TOUTE la structure HTML existante -->
-    <!-- ... (Tout le HTML reste identique) ... -->
+        <div id="view-login" class="auth-box">
+            <h2 style="text-align: center; margin-bottom: 20px;">Connexion Server</h2>
+            <div id="login-error" class="error-msg"></div>
+            <input type="text" id="login-user" placeholder="Nom d'utilisateur" />
+            <input type="password" id="login-pass" placeholder="Mot de passe" />
+            <button onclick="handleLogin()">SE CONNECTER</button>
+            <button class="secondary-btn" onclick="toggleAuthMode()">Créer un compte</button>
+        </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/json-viewer/1.4.0/json-viewer.min.js"></script>
-    
-    <script>
-        // ============================================
-        // CONFIGURATION CORRIGÉE POUR VOTRE SERVEUR
-        // ============================================
-        const API_BASE_URL = 'https://golv.onrender.com';  // Votre serveur
-        let currentToken = localStorage.getItem('golv_token') || '';
-        let currentUser = localStorage.getItem('golv_user') || '';
-        let currentUserId = localStorage.getItem('golv_user_id') || '';
-        let currentVM = localStorage.getItem('golv_vm') || '';
-        let apiCalls = 0;
-        let commandHistory = [];
-        let userVMs = [];
+        <div id="view-register" class="auth-box hidden">
+            <h2 style="text-align: center; margin-bottom: 20px;">Rejoindre GoPu</h2>
+            <div id="reg-error" class="error-msg"></div>
+            <input type="text" id="reg-user" placeholder="Nom d'utilisateur" />
+            <input type="password" id="reg-pass" placeholder="Mot de passe" />
+            <button onclick="handleRegister()">S'INSCRIRE</button>
+            <button class="secondary-btn" onclick="toggleAuthMode()">J'ai déjà un compte</button>
+        </div>
 
-        // ============================================
-        // FONCTIONS UTILITAIRES AMÉLIORÉES
-        // ============================================
+        <div id="view-dashboard" class="hidden">
+            <h2 style="margin-bottom: 15px;">Mes Serveurs Virtuels</h2>
+            <div id="vm-container" class="vm-list">
+                <div style="text-align:center; color: var(--text-dim); padding: 40px;">Chargement...</div>
+            </div>
+        </div>
+
+        <div id="view-create" class="create-vm-box hidden">
+            <h2 style="margin-bottom: 20px;">Nouveau Server</h2>
+            <div id="create-error" class="error-msg"></div>
+            <input type="text" id="vm-name" placeholder="Nom du serveur" />
+            <select id="vm-type">
+                <option value="ubuntu">Ubuntu Server</option>
+                <option value="debian">Debian</option>
+                <option value="python-dev">Python Dev Env</option>
+                <option value="nodejs">Node.js</option>
+                <option value="docker-host">Docker Host</option>
+            </select>
+            <select id="vm-version">
+                <option value="latest">Latest Stable</option>
+                <option value="lts">LTS Version</option>
+            </select>
+            <div style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="vm-public" style="width: auto; margin:0;"> Public (Partager avec la communauté)
+                </label>
+            </div>
+            <button onclick="handleCreateVM()">DÉPLOYER</button>
+            <button class="secondary-btn" onclick="showDashboard()">Annuler</button>
+        </div>
+
+    </div>
+
+    <div id="vm-window" class="window-manager">
+        <div class="window-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <svg viewBox="0 0 24 24" style="width:20px; fill:var(--primary);"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"/></svg>
+                <span id="active-vm-name">VM-Terminal</span>
+            </div>
+            <button onclick="closeVMWindow()" style="width: auto; padding: 5px 10px; background: var(--danger); font-size: 12px;">FERMER</button>
+        </div>
         
-        async function makeApiRequest(endpoint, options = {}) {
-            const url = `${API_BASE_URL}${endpoint}`;
-            const defaultHeaders = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            };
-            
-            if (currentToken) {
-                defaultHeaders['Authorization'] = `Bearer ${currentToken}`;
+        <div style="background: #252830; padding: 5px; display: flex; gap: 10px; border-bottom: 1px solid var(--border);">
+            <button onclick="switchTab('term')" style="width:auto; padding: 5px 15px; background: #333; font-size: 0.8rem;">> Terminal</button>
+            <button onclick="switchTab('info')" style="width:auto; padding: 5px 15px; background: transparent; border:none; color: #888; font-size: 0.8rem;">Info</button>
+        </div>
+
+        <div id="tab-term" class="terminal" onclick="document.getElementById('cmd-input').focus()">
+            <div class="terminal-output" id="term-output">
+                <div>Connexion au socket sécurisé...</div>
+                <div>Authentification réussie. Bienvenue sur GoLV Cloud.</div>
+                <div style="color: #666">Type 'help' for available commands.</div>
+                <br>
+            </div>
+            <div class="cmd-input-area">
+                <span style="color: var(--primary); margin-right: 8px;">root@golv:~#</span>
+                <input type="text" id="cmd-input" autocomplete="off" style="flex:1; color: white;">
+            </div>
+        </div>
+
+        <div id="tab-info" class="terminal hidden" style="background: var(--bg); color: var(--text);">
+            <div style="padding: 20px;">
+                <h3>Status du Serveur</h3>
+                <p id="vm-info-details">Chargement...</p>
+                <hr style="border-color: var(--border); margin: 15px 0;">
+                <p>Host: golv.onrender.com</p>
+                <p>Owner: <span id="vm-owner">Me</span></p>
+            </div>
+        </div>
+    </div>
+
+    <button id="fab-create" class="fab hidden" onclick="showCreateVM()">+</button>
+
+    <script>
+        // CONFIG
+        const API_URL = "https://golv.onrender.com";
+        let CURRENT_USER = null;
+        let TOKEN = localStorage.getItem('golv_token');
+        let ACTIVE_VM_ID = null;
+
+        // --- AUTH LOGIC ---
+        
+        async function checkAuth() {
+            if (!TOKEN) {
+                showLogin();
+                return;
             }
-            
-            console.log(`API Request: ${options.method || 'GET'} ${url}`);
-            
             try {
-                const response = await fetch(url, {
-                    ...options,
-                    headers: {
-                        ...defaultHeaders,
-                        ...options.headers
-                    },
-                    mode: 'cors'
+                const res = await fetch(`${API_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
                 });
-                
-                apiCalls++;
-                updateStats();
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.detail || `HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                return data;
-                
-            } catch (error) {
-                console.error('API Request failed:', error);
-                throw error;
-            }
-        }
-
-        function showToast(title, message, type = 'info') {
-            const colors = {
-                success: '#10b981',
-                error: '#ef4444',
-                warning: '#f59e0b',
-                info: '#3b82f6'
-            };
-            
-            Toastify({
-                text: `<strong>${title}</strong><br>${message}`,
-                duration: 3000,
-                close: true,
-                gravity: 'top',
-                position: 'right',
-                backgroundColor: colors[type],
-                escapeMarkup: false
-            }).showToast();
-        }
-
-        function showLoading(message = 'Chargement...') {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.querySelector('div:nth-child(2)').textContent = message;
-            overlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            setTimeout(() => {
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }, 500);
-        }
-
-        // ============================================
-        // INITIALISATION
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            init();
-        });
-
-        async function init() {
-            console.log('Initialisation GoLV Dashboard...');
-            
-            // Vérifier la connexion API
-            await checkApiStatus();
-            
-            // Vérifier si l'utilisateur est connecté
-            if (currentToken && currentUser) {
-                try {
-                    // Vérifier si le token est toujours valide
-                    const userInfo = await makeApiRequest('/api/auth/me');
-                    
-                    showToast('Connexion automatique', `Bonjour ${currentUser}!`, 'success');
-                    loadDashboard();
-                    
-                } catch (error) {
-                    console.log('Token invalide, déconnexion...');
+                if (res.ok) {
+                    CURRENT_USER = await res.json();
+                    updateUIUser();
+                    showDashboard();
+                } else {
                     logout();
                 }
-            } else {
-                showAuthSection();
-            }
-            
-            // Cacher le loading
-            setTimeout(() => {
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }, 1000);
-        }
-
-        // ============================================
-        // AUTHENTIFICATION - CORRIGÉ
-        // ============================================
-        async function login(event) {
-            if (event) event.preventDefault();
-            
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!username || !password) {
-                showToast('Erreur', 'Veuillez remplir tous les champs', 'error');
-                return;
-            }
-            
-            showLoading('Connexion en cours...');
-            
-            try {
-                // ENDPOINT CORRECT selon votre serveur
-                const response = await makeApiRequest('/api/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ username, password })
-                });
-                
-                // FORMAT DE RÉPONSE de votre serveur
-                if (response.access_token) {
-                    currentToken = response.access_token;
-                    currentUser = response.username;
-                    currentUserId = response.user_id;
-                    
-                    // Sauvegarder dans localStorage
-                    localStorage.setItem('golv_token', currentToken);
-                    localStorage.setItem('golv_user', currentUser);
-                    localStorage.setItem('golv_user_id', currentUserId);
-                    
-                    hideModal('loginModal');
-                    showToast('Connexion réussie', `Bienvenue ${currentUser}!`, 'success');
-                    loadDashboard();
-                    
-                } else {
-                    showToast('Erreur', 'Format de réponse incorrect', 'error');
-                }
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                showToast('Erreur de connexion', error.message || 'Identifiants incorrects', 'error');
-            }
-            
-            hideLoading();
-        }
-
-        async function register(event) {
-            if (event) event.preventDefault();
-            
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-            
-            if (!username || !password) {
-                showToast('Erreur', 'Veuillez remplir tous les champs', 'error');
-                return;
-            }
-            
-            if (password !== passwordConfirm) {
-                showToast('Erreur', 'Les mots de passe ne correspondent pas', 'error');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showToast('Erreur', 'Le mot de passe doit faire au moins 6 caractères', 'error');
-                return;
-            }
-            
-            showLoading('Création du compte...');
-            
-            try {
-                // ENDPOINT CORRECT selon votre serveur
-                const response = await makeApiRequest('/api/auth/register', {
-                    method: 'POST',
-                    body: JSON.stringify({ username, password })
-                });
-                
-                if (response.access_token) {
-                    currentToken = response.access_token;
-                    currentUser = response.username;
-                    currentUserId = response.user_id;
-                    
-                    // Sauvegarder dans localStorage
-                    localStorage.setItem('golv_token', currentToken);
-                    localStorage.setItem('golv_user', currentUser);
-                    localStorage.setItem('golv_user_id', currentUserId);
-                    
-                    hideModal('registerModal');
-                    showToast('Compte créé', `Bienvenue ${currentUser}!`, 'success');
-                    loadDashboard();
-                    
-                } else {
-                    showToast('Erreur', 'Format de réponse incorrect', 'error');
-                }
-                
-            } catch (error) {
-                console.error('Register error:', error);
-                showToast('Erreur d\'inscription', error.message || 'Nom d\'utilisateur déjà pris', 'error');
-            }
-            
-            hideLoading();
-        }
-
-        // ============================================
-        // GESTION DES VMs - CORRIGÉ
-        // ============================================
-        async function loadVMs() {
-            if (!currentToken) {
-                console.log('Non connecté, impossible de charger les VMs');
-                return;
-            }
-            
-            showLoading('Chargement des VMs...');
-            
-            try {
-                // ENDPOINT CORRECT
-                const response = await makeApiRequest('/api/vms?public_only=false');
-                
-                if (response.success && response.data) {
-                    userVMs = response.data;
-                    
-                    updateVMsDisplay();
-                    updateVMSelect();
-                    
-                    // Mettre à jour les stats
-                    const totalVMs = userVMs.length;
-                    const runningVMs = userVMs.filter(vm => 
-                        vm.status === 'running' || vm.status === 'active'
-                    ).length;
-                    
-                    document.getElementById('totalVMs').textContent = totalVMs;
-                    document.getElementById('totalVMsStat').textContent = totalVMs;
-                    document.getElementById('runningVMs').textContent = runningVMs;
-                    document.getElementById('runningVMsStat').textContent = runningVMs;
-                    
-                    // Sélectionner la première VM si aucune n'est sélectionnée
-                    if (!currentVM && userVMs.length > 0) {
-                        currentVM = userVMs[0].id;
-                        localStorage.setItem('golv_vm', currentVM);
-                        updateTerminalPrompt();
-                    }
-                    
-                } else {
-                    console.log('Aucune VM trouvée ou format de réponse incorrect');
-                    userVMs = [];
-                    updateVMsDisplay();
-                }
-                
-            } catch (error) {
-                console.error('Error loading VMs:', error);
-                showToast('Erreur', 'Impossible de charger les VMs', 'error');
-                userVMs = [];
-                updateVMsDisplay();
-            }
-            
-            hideLoading();
-        }
-
-        async function createVM(event) {
-            if (event) event.preventDefault();
-            
-            const name = document.getElementById('vmName').value;
-            const type = document.getElementById('vmType').value;
-            const version = document.getElementById('vmVersion').value;
-            const isPublic = document.getElementById('vmPublic').checked;
-            
-            if (!name || !type || !version) {
-                showToast('Erreur', 'Veuillez remplir tous les champs obligatoires', 'error');
-                return;
-            }
-            
-            showLoading('Création de la VM...');
-            
-            try {
-                // FORMAT CORRECT pour votre API
-                const response = await makeApiRequest('/api/vms', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        name: name,
-                        vm_type: type,
-                        version: version,
-                        is_public: isPublic,
-                        tags: ['web-created']
-                    })
-                });
-                
-                if (response.success) {
-                    hideModal('createVMModal');
-                    showToast('VM créée', `VM ${response.vm_id} créée avec succès!`, 'success');
-                    
-                    // Réinitialiser le formulaire
-                    document.getElementById('createVMForm').reset();
-                    
-                    // Recharger les VMs
-                    await loadVMs();
-                    
-                } else {
-                    showToast('Erreur', response.message || 'Erreur de création', 'error');
-                }
-                
-            } catch (error) {
-                console.error('Create VM error:', error);
-                showToast('Erreur', error.message || 'Impossible de créer la VM', 'error');
-            }
-            
-            hideLoading();
-        }
-
-        // ============================================
-        // EXÉCUTION DE COMMANDES - CORRIGÉ
-        // ============================================
-        async function executeCommand() {
-            const command = document.getElementById('terminalInput').value.trim();
-            if (!command) {
-                showToast('Erreur', 'Veuillez entrer une commande', 'error');
-                return;
-            }
-            
-            if (!currentVM) {
-                showToast('Erreur', 'Veuillez sélectionner une VM', 'error');
-                return;
-            }
-            
-            // Ajouter la commande au terminal
-            addTerminalOutput(`$ ${command}`, 'command');
-            
-            // Effacer l'entrée
-            document.getElementById('terminalInput').value = '';
-            
-            showLoading('Exécution de la commande...');
-            
-            try {
-                // ENDPOINT CORRECT selon votre serveur
-                const response = await makeApiRequest(`/api/vms/${currentVM}/execute`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        command: command,
-                        timeout: 30,
-                        user: "root",
-                        async_execution: false
-                    })
-                });
-                
-                if (response.success) {
-                    const result = response.data;
-                    
-                    // Ajouter à l'historique
-                    commandHistory.push({
-                        command: command,
-                        result: result,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    updateCommandHistory();
-                    
-                    // Afficher le résultat dans le terminal
-                    if (result.success) {
-                        if (result.stdout) {
-                            addTerminalOutput(result.stdout, 'success');
-                        }
-                    } else {
-                        if (result.error) {
-                            addTerminalOutput(`Erreur: ${result.error}`, 'error');
-                        }
-                        if (result.stderr) {
-                            addTerminalOutput(result.stderr, 'error');
-                        }
-                    }
-                    
-                    // Mettre à jour les stats
-                    document.getElementById('commandsExecuted').textContent = 
-                        parseInt(document.getElementById('commandsExecuted').textContent) + 1;
-                    
-                } else {
-                    addTerminalOutput(`Erreur: ${response.message || 'Erreur inconnue'}`, 'error');
-                }
-                
-            } catch (error) {
-                console.error('Execute command error:', error);
-                addTerminalOutput(`Erreur réseau: ${error.message}`, 'error');
-            }
-            
-            hideLoading();
-        }
-
-        async function runPredefinedCommand(commandType) {
-            if (!currentVM) {
-                showToast('Erreur', 'Veuillez sélectionner une VM', 'error');
-                return;
-            }
-            
-            addTerminalOutput(`$ [PREDEFINED] ${commandType}`, 'command');
-            
-            showLoading('Exécution de la commande...');
-            
-            try {
-                // ENDPOINT CORRECT
-                const response = await makeApiRequest(`/api/vms/${currentVM}/execute/predefined`, {
-                    method: 'POST',
-                    body: JSON.stringify(commandType)
-                });
-                
-                if (response.success) {
-                    const result = response.data;
-                    
-                    // Ajouter à l'historique
-                    commandHistory.push({
-                        command: `[PREDEFINED] ${commandType}`,
-                        result: result,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    updateCommandHistory();
-                    
-                    if (result.success && result.stdout) {
-                        addTerminalOutput(result.stdout, 'success');
-                    }
-                    
-                } else {
-                    addTerminalOutput(`Erreur: ${response.message || 'Erreur inconnue'}`, 'error');
-                }
-                
-            } catch (error) {
-                console.error('Predefined command error:', error);
-                addTerminalOutput(`Erreur: ${error.message}`, 'error');
-            }
-            
-            hideLoading();
-        }
-
-        // ============================================
-        // GESTION DE L'INTERFACE - CORRIGÉ
-        // ============================================
-        function updateVMsDisplay() {
-            const container = document.getElementById('vmListContainer');
-            
-            if (!userVMs || userVMs.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-4">
-                        <i class="fas fa-server fa-2x text-muted mb-3"></i>
-                        <p class="text-muted">Aucune VM trouvée</p>
-                        <button class="btn btn-golv btn-sm" onclick="showCreateVMModal()">
-                            <i class="fas fa-plus"></i> Créer une VM
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            userVMs.forEach(vm => {
-                const isActive = vm.id === currentVM;
-                const statusClass = vm.status === 'running' ? 'vm-status-running' : 'vm-status-stopped';
-                
-                html += `
-                    <div class="vm-item ${isActive ? 'active' : ''}" 
-                         onclick="selectVM('${vm.id}')">
-                        <div>
-                            <span class="vm-status ${statusClass}"></span>
-                            <strong>${vm.name || vm.id}</strong>
-                            <small class="text-muted d-block">${vm.vm_type || 'unknown'} ${vm.version || ''}</small>
-                        </div>
-                        <div>
-                            <span class="badge ${vm.is_public ? 'bg-info' : 'bg-secondary'}">
-                                ${vm.is_public ? 'Public' : 'Privé'}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        function updateVMSelect() {
-            const select = document.getElementById('vmSelect');
-            select.innerHTML = '<option value="">Sélectionnez une VM</option>';
-            
-            userVMs.forEach(vm => {
-                const option = document.createElement('option');
-                option.value = vm.id;
-                option.textContent = `${vm.name || vm.id} (${vm.vm_type || 'unknown'})`;
-                if (vm.id === currentVM) option.selected = true;
-                select.appendChild(option);
-            });
-            
-            select.onchange = function() {
-                selectVM(this.value);
-            };
-        }
-
-        function selectVM(vmId) {
-            currentVM = vmId;
-            localStorage.setItem('golv_vm', vmId);
-            
-            updateTerminalPrompt();
-            updateVMsDisplay();
-            
-            // Mettre à jour la sélection
-            document.getElementById('vmSelect').value = vmId;
-            
-            showToast('VM sélectionnée', 'Terminal prêt pour cette VM', 'success');
-            
-            // Charger l'historique des commandes de cette VM
-            loadVMCommands(vmId);
-        }
-
-        async function loadVMCommands(vmId) {
-            try {
-                const response = await makeApiRequest(`/api/vms/${vmId}/commands?limit=10`);
-                
-                if (response.success && response.database_history) {
-                    // Fusionner l'historique
-                    const dbHistory = response.database_history.map(cmd => ({
-                        command: cmd.command,
-                        result: {
-                            success: cmd.status === 'completed',
-                            stdout: cmd.stdout,
-                            stderr: cmd.stderr,
-                            return_code: cmd.return_code
-                        },
-                        timestamp: cmd.executed_at
-                    }));
-                    
-                    commandHistory = [...dbHistory, ...commandHistory.filter(cmd => 
-                        !dbHistory.some(dbCmd => dbCmd.timestamp === cmd.timestamp)
-                    )];
-                    
-                    updateCommandHistory();
-                }
-            } catch (error) {
-                console.log('Impossible de charger l\'historique des commandes:', error);
+            } catch (e) {
+                console.error("Auth check fail", e);
+                // If server is sleeping, it might fail. Don't logout immediately in prod usually, but here:
+                showToast("Erreur de connexion au serveur...");
             }
         }
 
-        function updateTerminalPrompt() {
-            const vm = userVMs.find(v => v.id === currentVM);
-            const prompt = vm ? `golv:${vm.name || vm.id}$` : '$';
-            document.getElementById('terminalPrompt').textContent = prompt;
-        }
-
-        function addTerminalOutput(text, type = 'normal') {
-            const terminal = document.getElementById('terminalOutput');
-            const line = document.createElement('div');
-            line.className = 'terminal-line';
-            
-            if (type === 'command') {
-                line.innerHTML = `<span class="terminal-command">${text}</span>`;
-            } else if (type === 'error') {
-                line.innerHTML = `<span class="terminal-error">${text}</span>`;
-            } else if (type === 'success') {
-                line.innerHTML = `<span class="terminal-success">${text}</span>`;
-            } else if (type === 'warning') {
-                line.innerHTML = `<span class="terminal-warning">${text}</span>`;
-            } else {
-                line.textContent = text;
-            }
-            
-            terminal.appendChild(line);
-            
-            // Auto-scroll
-            terminal.scrollTop = terminal.scrollHeight;
-        }
-
-        function updateCommandHistory() {
-            const container = document.getElementById('commandHistory');
-            
-            if (!commandHistory || commandHistory.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-4">
-                        <i class="fas fa-history"></i> Aucune commande exécutée
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            commandHistory.slice(-10).reverse().forEach((item, index) => {
-                const time = new Date(item.timestamp).toLocaleTimeString();
-                const success = item.result?.success;
-                
-                html += `
-                    <div class="vm-item">
-                        <div>
-                            <code style="font-size: 0.9rem;">${item.command.length > 50 ? item.command.substring(0, 50) + '...' : item.command}</code>
-                            <small class="text-muted d-block">${time}</small>
-                        </div>
-                        <div>
-                            <span class="badge ${success ? 'bg-success' : 'bg-danger'}">
-                                ${success ? '✓' : '✗'}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        // ============================================
-        // GESTION DU DASHBOARD
-        // ============================================
-        function showAuthSection() {
-            document.getElementById('authSection').style.display = 'block';
-            document.getElementById('dashboardSection').style.display = 'none';
-            document.getElementById('usernameDisplay').textContent = 'Non connecté';
-        }
-
-        async function loadDashboard() {
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('dashboardSection').style.display = 'grid';
-            document.getElementById('usernameDisplay').textContent = currentUser;
-            document.getElementById('userInfo').textContent = currentUser;
-            
-            // Charger les données utilisateur
-            await loadVMs();
-            updateCommandHistory();
-            updateStats();
-            updateTerminalPrompt();
-            
-            // Mettre à jour l'URL du serveur
-            document.getElementById('serverUrl').textContent = API_BASE_URL;
-            document.getElementById('apiUrlDisplay').textContent = API_BASE_URL;
+        function updateUIUser() {
+            document.getElementById('username-span').innerText = CURRENT_USER.username;
+            document.getElementById('user-display').classList.remove('hidden');
         }
 
         function logout() {
-            currentToken = '';
-            currentUser = '';
-            currentUserId = '';
-            currentVM = '';
-            
             localStorage.removeItem('golv_token');
-            localStorage.removeItem('golv_user');
-            localStorage.removeItem('golv_user_id');
-            localStorage.removeItem('golv_vm');
-            
-            commandHistory = [];
-            userVMs = [];
-            
-            showToast('Déconnexion', 'Vous avez été déconnecté', 'info');
-            showAuthSection();
+            TOKEN = null;
+            CURRENT_USER = null;
+            document.getElementById('user-display').classList.add('hidden');
+            showLogin();
         }
 
-        // ============================================
-        // STATUT API ET CONNEXION
-        // ============================================
-        async function checkApiStatus() {
+        async function handleLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            const btn = document.querySelector('#view-login button');
+            
+            btn.innerText = "CONNEXION..."; btn.disabled = true;
+
             try {
-                const response = await fetch(`${API_BASE_URL}/`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                const res = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
                 });
+                const data = await res.json();
                 
-                if (response.status === 200 || response.status === 404) {
-                    // Le serveur répond
-                    const data = await response.json();
-                    
-                    document.getElementById('apiStatus').textContent = 'Online';
-                    document.getElementById('apiStatusBadge').textContent = 'Online';
-                    document.getElementById('apiStatusBadge').className = 'badge bg-success';
-                    
-                    console.log('API Status:', data);
-                    return true;
-                    
+                if (res.ok) {
+                    TOKEN = data.access_token;
+                    localStorage.setItem('golv_token', TOKEN);
+                    await checkAuth();
                 } else {
-                    throw new Error(`HTTP ${response.status}`);
+                    document.getElementById('login-error').innerText = data.detail || "Erreur login";
                 }
-                
-            } catch (error) {
-                console.error('API check error:', error);
-                
-                document.getElementById('apiStatus').textContent = 'Offline';
-                document.getElementById('apiStatusBadge').textContent = 'Offline';
-                document.getElementById('apiStatusBadge').className = 'badge bg-danger';
-                
-                showToast('Serveur hors ligne', 'Impossible de se connecter au serveur GoLV', 'error');
-                return false;
+            } catch (e) {
+                document.getElementById('login-error').innerText = "Erreur réseau. Le serveur dort peut-être?";
+            } finally {
+                btn.innerText = "SE CONNECTER"; btn.disabled = false;
             }
         }
 
-        function updateStats() {
-            document.getElementById('apiCalls').textContent = apiCalls;
-            document.getElementById('commandsExecuted').textContent = commandHistory.length;
-        }
-
-        function refreshStats() {
-            loadVMs();
-            showToast('Rafraîchissement', 'Statistiques mises à jour', 'info');
-        }
-
-        function testConnection() {
-            showLoading('Test de connexion...');
+        async function handleRegister() {
+            const u = document.getElementById('reg-user').value;
+            const p = document.getElementById('reg-pass').value;
             
-            setTimeout(async () => {
-                const isOnline = await checkApiStatus();
-                
-                if (isOnline) {
-                    showToast('Connexion OK', 'Serveur GoLV accessible', 'success');
+            try {
+                const res = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                if (res.ok) {
+                    // Auto login after register
+                    document.getElementById('login-user').value = u;
+                    document.getElementById('login-pass').value = p;
+                    handleLogin();
                 } else {
-                    showToast('Connexion échouée', 'Serveur GoLV inaccessible', 'error');
+                    const data = await res.json();
+                    document.getElementById('reg-error').innerText = data.detail || "Erreur";
                 }
-                
-                hideLoading();
-            }, 1000);
-        }
-
-        // ============================================
-        // GESTION DES ÉVÉNEMENTS
-        // ============================================
-        function handleTerminalKeyPress(event) {
-            if (event.key === 'Enter') {
-                executeCommand();
+            } catch (e) {
+                document.getElementById('reg-error').innerText = "Erreur réseau";
             }
         }
 
-        // ============================================
-        // FONCTIONS MODALES (inchangées)
-        // ============================================
-        function showLoginModal() {
-            document.getElementById('loginModal').classList.add('active');
+        // --- VIEW MANAGEMENT ---
+
+        function hideAllViews() {
+            ['view-login', 'view-register', 'view-dashboard', 'view-create'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById('fab-create').classList.add('hidden');
         }
 
-        function showRegisterModal() {
-            document.getElementById('registerModal').classList.add('active');
+        function showLogin() {
+            hideAllViews();
+            document.getElementById('view-login').classList.remove('hidden');
         }
 
-        function showCreateVMModal() {
-            document.getElementById('createVMModal').classList.add('active');
-        }
-
-        function showGenerateApiKeyModal() {
-            document.getElementById('generateApiKeyModal').classList.add('active');
-        }
-
-        function hideModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function toggleTheme() {
-            const theme = document.body.getAttribute('data-theme');
-            const icon = document.getElementById('themeIcon');
-            
-            if (theme === 'dark') {
-                document.body.removeAttribute('data-theme');
-                icon.className = 'fas fa-moon';
-                localStorage.setItem('golv_theme', 'light');
+        function toggleAuthMode() {
+            const login = document.getElementById('view-login');
+            const reg = document.getElementById('view-register');
+            if (login.classList.contains('hidden')) {
+                login.classList.remove('hidden'); reg.classList.add('hidden');
             } else {
-                document.body.setAttribute('data-theme', 'dark');
-                icon.className = 'fas fa-sun';
-                localStorage.setItem('golv_theme', 'dark');
+                login.classList.add('hidden'); reg.classList.remove('hidden');
             }
         }
 
-        function switchTerminalTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // TODO: Implémenter le changement d'onglet si nécessaire
+        async function showDashboard() {
+            hideAllViews();
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            document.getElementById('fab-create').classList.remove('hidden');
+            await loadVMs();
         }
 
-        function showApiDocs() {
-            window.open(`${API_BASE_URL}/docs`, '_blank');
+        function showCreateVM() {
+            hideAllViews();
+            document.getElementById('view-create').classList.remove('hidden');
         }
 
-        // ============================================
-        // INITIALISATION DU THÈME
-        // ============================================
-        const savedTheme = localStorage.getItem('golv_theme') || 'light';
-        if (savedTheme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            document.getElementById('themeIcon').className = 'fas fa-sun';
-        }
+        // --- VM LOGIC ---
 
-        // ============================================
-        // FONCTIONS POUR LE MODE DÉMO (en cas d'API hors ligne)
-        // ============================================
-        function enableDemoMode() {
-            console.log('Activation du mode démo...');
-            
-            // Données de démo
-            userVMs = [
-                { 
-                    id: 'demo-1', 
-                    name: 'VM Python Demo', 
-                    vm_type: 'python-dev', 
-                    version: '3.11', 
-                    status: 'running', 
-                    is_public: true 
-                },
-                { 
-                    id: 'demo-2', 
-                    name: 'Serveur Ubuntu', 
-                    vm_type: 'ubuntu', 
-                    version: '22.04 LTS', 
-                    status: 'stopped', 
-                    is_public: false 
+        async function loadVMs() {
+            const container = document.getElementById('vm-container');
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Chargement des données...</div>';
+
+            try {
+                const res = await fetch(`${API_URL}/api/vms?limit=50`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const json = await res.json();
+                
+                if (json.data && json.data.length > 0) {
+                    container.innerHTML = '';
+                    json.data.forEach(vm => {
+                        const card = document.createElement('div');
+                        card.className = 'vm-card';
+                        card.innerHTML = `
+                            <div>
+                                <div style="display:flex; align-items:center; margin-bottom:5px;">
+                                    <span class="vm-status ${vm.status === 'running' ? 'running' : ''}"></span>
+                                    <strong style="font-size:1.1rem;">${vm.name}</strong>
+                                </div>
+                                <div style="font-size:0.85rem; color:var(--text-dim);">
+                                    ${vm.vm_type} • ${vm.version} • ${vm.owner_name}
+                                </div>
+                            </div>
+                            <button onclick="openVM('${vm.id}', '${vm.name}')" style="width:auto; padding:8px 15px; font-size:0.9rem;">
+                                TERMINAL >
+                            </button>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<div style="text-align:center; color:gray;">Aucune VM trouvée. Créez-en une !</div>';
                 }
-            ];
-            
-            // Simuler une connexion
-            currentUser = 'demo_user';
-            currentUserId = 'demo_123';
-            
-            // Mettre à jour l'affichage
-            updateVMsDisplay();
-            updateStats();
-            
-            showToast('Mode démo', 'API hors ligne - Mode démo activé', 'warning');
+
+            } catch (e) {
+                container.innerHTML = '<div style="color:red; text-align:center;">Erreur de chargement.</div>';
+            }
         }
 
-        // Vérifier si on doit activer le mode démo
-        setTimeout(async () => {
-            const isOnline = await checkApiStatus();
-            if (!isOnline && !currentToken) {
-                enableDemoMode();
+        async function handleCreateVM() {
+            const name = document.getElementById('vm-name').value;
+            const type = document.getElementById('vm-type').value;
+            const ver = document.getElementById('vm-version').value;
+            const isPub = document.getElementById('vm-public').checked;
+            
+            if(!name) return;
+
+            const btn = document.querySelector('#view-create button');
+            btn.disabled = true; btn.innerText = "DÉPLOIEMENT...";
+
+            try {
+                const res = await fetch(`${API_URL}/api/vms`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        vm_type: type,
+                        version: ver,
+                        is_public: isPub,
+                        description: "Created via Mobile Web"
+                    })
+                });
+
+                if (res.ok) {
+                    showToast("Serveur déployé avec succès !");
+                    showDashboard();
+                    // Reset form
+                    document.getElementById('vm-name').value = "";
+                } else {
+                    const d = await res.json();
+                    document.getElementById('create-error').innerText = d.detail || "Erreur";
+                }
+            } catch (e) {
+                document.getElementById('create-error').innerText = "Erreur serveur";
+            } finally {
+                btn.disabled = false; btn.innerText = "DÉPLOYER";
             }
-        }, 2000);
+        }
+
+        // --- TERMINAL LOGIC ---
+
+        function openVM(id, name) {
+            ACTIVE_VM_ID = id;
+            document.getElementById('active-vm-name').innerText = name;
+            document.getElementById('vm-window').style.display = 'flex';
+            document.getElementById('term-output').innerHTML = '<div>Initialisation de la session sécurisée...</div>';
+            
+            // Initial Status Check
+            executeCommand('echo "Connecté à ' + name + '"');
+            executeCommand('uname -a');
+        }
+
+        function closeVMWindow() {
+            document.getElementById('vm-window').style.display = 'none';
+            ACTIVE_VM_ID = null;
+        }
+
+        // Handle Command Input
+        document.getElementById('cmd-input').addEventListener('keypress', async function (e) {
+            if (e.key === 'Enter') {
+                const cmd = this.value;
+                if (!cmd) return;
+                
+                this.value = '';
+                addTermLine(`root@golv:~# ${cmd}`, 'white');
+                
+                if (cmd === 'clear') {
+                    document.getElementById('term-output').innerHTML = '';
+                    return;
+                }
+                if (cmd === 'exit') {
+                    closeVMWindow();
+                    return;
+                }
+
+                await executeCommand(cmd);
+            }
+        });
+
+        function addTermLine(text, color = '#00ff88') {
+            const div = document.createElement('div');
+            div.innerText = text;
+            div.style.color = color;
+            const out = document.getElementById('term-output');
+            out.appendChild(div);
+            // Scroll to bottom
+            const term = document.getElementById('tab-term');
+            term.scrollTop = term.scrollHeight;
+        }
+
+        async function executeCommand(cmdStr) {
+            if (!ACTIVE_VM_ID) return;
+            
+            try {
+                // Determine if it matches predefined or raw
+                // Based on backend, we can use raw execute for flexibility
+                const payload = {
+                    command: cmdStr,
+                    timeout: 30,
+                    working_dir: "/root"
+                };
+
+                const res = await fetch(`${API_URL}/api/vms/${ACTIVE_VM_ID}/execute`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (data.data && data.data.stdout) {
+                    addTermLine(data.data.stdout);
+                }
+                if (data.data && data.data.stderr) {
+                    addTermLine(data.data.stderr, '#ff4757');
+                }
+                if (!data.success) {
+                    addTermLine("Error: " + (data.error || "Command failed"), '#ff4757');
+                }
+
+            } catch (e) {
+                addTermLine("Erreur de communication avec le terminal.", '#ff4757');
+            }
+        }
+
+        function switchTab(tab) {
+            if (tab === 'term') {
+                document.getElementById('tab-term').classList.remove('hidden');
+                document.getElementById('tab-info').classList.add('hidden');
+            } else {
+                document.getElementById('tab-term').classList.add('hidden');
+                document.getElementById('tab-info').classList.remove('hidden');
+                // Fetch info
+                fetchVMInfo();
+            }
+        }
+
+        async function fetchVMInfo() {
+            if(!ACTIVE_VM_ID) return;
+            try {
+                const res = await fetch(`${API_URL}/api/vms/${ACTIVE_VM_ID}/status`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const d = await res.json();
+                document.getElementById('vm-info-details').innerHTML = `
+                    Status: <b>${d.status.status}</b><br>
+                    Size: ${d.status.size_human || '0 B'}<br>
+                    Files: ${d.status.file_count || 0}
+                `;
+            } catch(e) {
+                document.getElementById('vm-info-details').innerText = "Erreur info";
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        // Init
+        checkAuth();
 
     </script>
 </body>
