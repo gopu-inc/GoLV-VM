@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoLV Dashboard - Terminal Sécurisé pour IA</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Toastify Notifications -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <!-- JSON Viewer -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/json-viewer/1.4.0/json-viewer.min.css">
+    
+    <style>
+        :root {
+            --primary: #6d28d9;
+            --primary-dark: #5b21b6;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --terminal-bg: #0f172a;
+            --terminal-text: #e2e8f0;
+            --terminal-green: #10b981;
+            --terminal-yellow: #fbbf24;
+            --terminal-red: #ef4444;
+            --terminal-blue: #3b82f6;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        [data-theme="dark"] {
+            --light: #1e293b;
+            --dark: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --terminal-bg: #0f172a;
+            --terminal-text: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            color: var(--dark);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Header & Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+        }
+        
+        /* Auth Section */
+        .auth-section {
+            display: none;
+        }
+        
+        .auth-section.active {
+            display: block;
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-header {
+            background: var(--gradient);
+            color: white;
+            padding: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Terminal */
+        .terminal {
+            background: var(--terminal-bg);
+            color: var(--terminal-text);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+        
+        .terminal-command {
+            color: var(--terminal-green);
+            font-weight: 500;
+        }
+        
+        .terminal-error {
+            color: var(--terminal-red);
+        }
+        
+        .terminal-success {
+            color: var(--terminal-green);
+        }
+        
+        .terminal-warning {
+            color: var(--terminal-yellow);
+        }
+        
+        .terminal-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .terminal-prompt {
+            color: var(--terminal-blue);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        /* Badges */
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        
+        .custom-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Buttons */
+        .btn-golv {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-golv:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(109, 40, 217, 0.4);
+        }
+        
+        .btn-golv-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: rgba(109, 40, 217, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* VM List */
+        .vm-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .vm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .vm-item:hover {
+            background: rgba(109, 40, 217, 0.05);
+        }
+        
+        .vm-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .vm-status-running {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .vm-status-stopped {
+            background: var(--danger);
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .terminal {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="color: white; font-size: 1.2rem;">Connexion à GoLV API...</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <div class="logo">
+                <i class="fas fa-server logo-icon"></i>
+                <span>GoLV Dashboard</span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="badge-container" id="serverStatusBadges">
+                    <span class="custom-badge" style="background: #6d28d9; color: white;">
+                        <i class="fas fa-server"></i> <span id="totalVMs">0</span> VMs
+                    </span>
+                    <span class="custom-badge" style="background: #10b981; color: white;">
+                        <i class="fas fa-play"></i> <span id="runningVMs">0</span> Running
+                    </span>
+                    <span class="custom-badge" style="background: #3b82f6; color: white;">
+                        <i class="fas fa-bolt"></i> <span id="apiStatus">Checking...</span>
+                    </span>
+                </div>
+                
+                <button class="btn btn-golv" onclick="toggleTheme()">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-golv dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> <span id="usernameDisplay">Non connecté</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Connexion</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showRegisterModal()"><i class="fas fa-user-plus"></i> Inscription</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Section (Initial) -->
+    <div class="container mt-5 auth-section active" id="authSection">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Bienvenue sur GoLV</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-terminal fa-4x" style="color: #6d28d9;"></i>
+                            <h3 class="mt-3">Terminal Sécurisé pour IA</h3>
+                            <p class="text-muted">Exécutez des commandes Python, Git, Node.js en toute sécurité</p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-golv w-100" onclick="showLoginModal()">
+                                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <button class="btn btn-golv-outline w-100" onclick="showRegisterModal()">
+                                    <i class="fas fa-user-plus"></i> Créer un compte
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Serveur API</h5>
+                            <code id="apiUrlDisplay">https://golv.onrender.com</code>
+                            <div class="mt-2">
+                                <span class="badge bg-success" id="apiStatusBadge">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard (After Login) -->
+    <div class="dashboard-grid" id="dashboardSection" style="display: none;">
+        <!-- Stats Overview -->
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-chart-bar"></i> Vue d'ensemble</span>
+                <button class="btn btn-sm btn-golv" onclick="refreshStats()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalVMsStat">0</div>
+                        <div>VMs Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="runningVMsStat">0</div>
+                        <div>VMs Actives</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="commandsExecuted">0</div>
+                        <div>Commandes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="apiCalls">0</div>
+                        <div>Appels API</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VM Management -->
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-server"></i> Gestion des VMs</span>
+                <button class="btn btn-sm btn-golv" onclick="showCreateVMModal()">
+                    <i class="fas fa-plus"></i> Nouvelle VM
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="vm-list" id="vmListContainer">
+                    <!-- VMs will be loaded here -->
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des VMs...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal -->
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-terminal"></i> Terminal</span>
+                <select class="form-select form-select-sm" style="width: auto;" id="vmSelect">
+                    <option value="">Sélectionnez une VM</option>
+                </select>
+            </div>
+            <div class="card-body">
+                <div class="terminal" id="terminalOutput">
+                    <div class="terminal-line">
+                        <span class="terminal-success">╔══════════════════════════════════════╗</span><br>
+                        <span class="terminal-success">║      GoLV Terminal - Version 1.0     ║</span><br>
+                        <span class="terminal-success">║    Terminal sécurisé pour IA        ║</span><br>
+                        <span class="terminal-success">╚══════════════════════════════════════╝</span><br><br>
+                        <span class="terminal-command">$ </span>Connectez-vous et sélectionnez une VM pour commencer
+                    </div>
+                </div>
+                
+                <div class="terminal-input">
+                    <span class="terminal-prompt" id="terminalPrompt">$</span>
+                    <input type="text" class="form-control" id="terminalInput" 
+                           placeholder="Entrez une commande (ex: echo 'Hello' ou python3 --version)" 
+                           onkeypress="handleTerminalKeyPress(event)">
+                    <button class="btn btn-golv" onclick="executeCommand()">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTerminalTab('predefined')">Commandes prédéfinies</button>
+                        <button class="tab" onclick="switchTerminalTab('history')">Historique</button>
+                        <button class="tab" onclick="switchTerminalTab('help')">Aide</button>
+                    </div>
+                    
+                    <div id="predefinedCommands" class="tab-content">
+                        <div class="row mt-2">
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-sm btn-golv-outline w-100" onclick="runPredefinedCommand('status')">
+                                    <i class="fas fa-info-circle"></i> Statut VM
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-sm btn-golv-outline w-100" onclick="runPredefinedCommand('python_test')">
+                                    <i class="fab fa-python"></i> Test Python
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-sm btn-golv-outline w-100" onclick="runPredefinedCommand('disk_usage')">
+                                    <i class="fas fa-hdd"></i> Usage Disque
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <button class="btn btn-sm btn-golv-outline w-100" onclick="runPredefinedCommand('network_info')">
+                                    <i class="fas fa-network-wired"></i> Info Réseau
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command History -->
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-history"></i> Historique des commandes</span>
+            </div>
+            <div class="card-body">
+                <div id="commandHistory">
+                    <!-- Command history will be loaded here -->
+                    <div class="text-center py-4">
+                        <i class="fas fa-history"></i> Aucune commande exécutée
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Keys Management -->
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-key"></i> Clés API</span>
+                <button class="btn btn-sm btn-golv" onclick="showGenerateApiKeyModal()">
+                    <i class="fas fa-plus"></i> Nouvelle clé
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="apiKeysList">
+                    <!-- API Keys will be loaded here -->
+                    <div class="text-center py-4">
+                        <i class="fas fa-key"></i> Aucune clé API
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="card">
+            <div class="card-header">
+                <span><i class="fas fa-info-circle"></i> Informations système</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-globe"></i> Serveur API</h6>
+                        <p><code id="serverUrl">https://golv.onrender.com</code></p>
+                        
+                        <h6><i class="fas fa-user"></i> Utilisateur</h6>
+                        <p id="userInfo">Non connecté</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-shield-alt"></i> Sécurité</h6>
+                        <p>Commandes autorisées: <span id="allowedCommandsCount">25</span></p>
+                        <p>Commandes bannies: <span id="bannedCommandsCount">6</span></p>
+                        
+                        <h6><i class="fas fa-database"></i> Base de données</h6>
+                        <p>PostgreSQL: <span class="badge bg-success">Connecté</span></p>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-golv-outline" onclick="testConnection()">
+                        <i class="fas fa-bolt"></i> Tester la connexion
+                    </button>
+                    <button class="btn btn-sm btn-golv-outline" onclick="showApiDocs()">
+                        <i class="fas fa-book"></i> Documentation API
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <h4><i class="fas fa-sign-in-alt"></i> Connexion</h4>
+            <form id="loginForm" onsubmit="login(event)">
+                <div class="form-group">
+                    <label class="form-label">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="loginUsername" required 
+                           placeholder="admin" value="admin">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mot de passe</label>
+                    <input type="password" class="form-control" id="loginPassword" required 
+                           placeholder="••••••••" value="admin123">
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-golv flex-grow-1">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                    <button type="button" class="btn btn-golv-outline" onclick="hideModal('loginModal')">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal">
+            <h4><i class="fas fa-user-plus"></i> Créer un compte</h4>
+            <form id="registerForm" onsubmit="register(event)">
+                <div class="form-group">
+                    <label class="form-label">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="registerUsername" required 
+                           placeholder="choisissez un nom d'utilisateur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mot de passe</label>
+                    <input type="password" class="form-control" id="registerPassword" required 
+                           placeholder="•••••••• (min 6 caractères)">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmer le mot de passe</label>
+                    <input type="password" class="form-control" id="registerPasswordConfirm" required 
+                           placeholder="••••••••">
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-golv flex-grow-1">
+                        <i class="fas fa-user-plus"></i> S'inscrire
+                    </button>
+                    <button type="button" class="btn btn-golv-outline" onclick="hideModal('registerModal')">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create VM Modal -->
+    <div class="modal-overlay" id="createVMModal">
+        <div class="modal">
+            <h4><i class="fas fa-plus"></i> Créer une nouvelle VM</h4>
+            <form id="createVMForm" onsubmit="createVM(event)">
+                <div class="form-group">
+                    <label class="form-label">Nom de la VM</label>
+                    <input type="text" class="form-control" id="vmName" required 
+                           placeholder="ex: Mon Serveur Python">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type de VM</label>
+                    <select class="form-control" id="vmType" required>
+                        <option value="python-dev">Python Dev</option>
+                        <option value="ubuntu">Ubuntu Server</option>
+                        <option value="nodejs">Node.js</option>
+                        <option value="docker-host">Docker Host</option>
+                        <option value="debian">Debian</option>
+                        <option value="wordpress">WordPress</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Version</label>
+                    <select class="form-control" id="vmVersion" required>
+                        <option value="3.11">Python 3.11</option>
+                        <option value="22.04 LTS">Ubuntu 22.04 LTS</option>
+                        <option value="20 LTS">Node.js 20 LTS</option>
+                        <option value="Latest">Docker Latest</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="vmPublic"> Rendre la VM publique
+                    </label>
+                    <small class="text-muted d-block">Les VMs publiques sont visibles par tous les utilisateurs</small>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-golv flex-grow-1">
+                        <i class="fas fa-server"></i> Créer la VM
+                    </button>
+                    <button type="button" class="btn btn-golv-outline" onclick="hideModal('createVMModal')">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Generate API Key Modal -->
+    <div class="modal-overlay" id="generateApiKeyModal">
+        <div class="modal">
+            <h4><i class="fas fa-key"></i> Générer une clé API</h4>
+            <form id="generateApiKeyForm" onsubmit="generateApiKey(event)">
+                <div class="form-group">
+                    <label class="form-label">Nom de la clé</label>
+                    <input type="text" class="form-control" id="apiKeyName" required 
+                           placeholder="ex: Clé pour mon script">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Permissions</label>
+                    <div>
+                        <label><input type="checkbox" name="permissions" value="vms:read" checked> Lecture VMs</label><br>
+                        <label><input type="checkbox" name="permissions" value="vms:write" checked> Écriture VMs</label><br>
+                        <label><input type="checkbox" name="permissions" value="commands:execute" checked> Exécution commandes</label><br>
+                        <label><input type="checkbox" name="permissions" value="files:read"> Lecture fichiers</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expiration (jours)</label>
+                    <input type="number" class="form-control" id="apiKeyExpires" min="1" max="365" value="30">
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-golv flex-grow-1">
+                        <i class="fas fa-key"></i> Générer la clé
+                    </button>
+                    <button type="button" class="btn btn-golv-outline" onclick="hideModal('generateApiKeyModal')">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json-viewer/1.4.0/json-viewer.min.js"></script>
+    
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://golv.onrender.com';
+        let currentToken = localStorage.getItem('golv_token') || '';
+        let currentUser = localStorage.getItem('golv_user') || '';
+        let currentVM = localStorage.getItem('golv_vm') || '';
+        let apiCalls = 0;
+        let commandHistory = [];
+        let userVMs = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
+
+        function init() {
+            // Check API connection
+            checkApiStatus();
+            
+            // Check if user is logged in
+            if (currentToken && currentUser) {
+                showToast('Connexion automatique', `Bonjour ${currentUser}!`, 'success');
+                loadDashboard();
+            } else {
+                showAuthSection();
+            }
+            
+            // Hide loading overlay
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }, 1000);
+        }
+
+        // API Functions
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/`);
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('apiStatus').textContent = 'Online';
+                    document.getElementById('apiStatusBadge').textContent = 'Online';
+                    document.getElementById('apiStatusBadge').className = 'badge bg-success';
+                    showToast('Serveur GoLV', 'Connecté avec succès!', 'success');
+                    return true;
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = 'Offline';
+                document.getElementById('apiStatusBadge').textContent = 'Offline';
+                document.getElementById('apiStatusBadge').className = 'badge bg-danger';
+                showToast('Erreur', 'Impossible de se connecter au serveur', 'error');
+                return false;
+            }
+        }
+
+        async function login(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            showLoading('Connexion en cours...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentToken = data.access_token;
+                    currentUser = data.username;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('golv_token', currentToken);
+                    localStorage.setItem('golv_user', currentUser);
+                    
+                    hideModal('loginModal');
+                    showToast('Connexion réussie', `Bienvenue ${currentUser}!`, 'success');
+                    loadDashboard();
+                } else {
+                    const error = await response.json();
+                    showToast('Erreur de connexion', error.detail || 'Identifiants incorrects', 'error');
+                }
+            } catch (error) {
+                showToast('Erreur', 'Impossible de se connecter au serveur', 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function register(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            if (password !== passwordConfirm) {
+                showToast('Erreur', 'Les mots de passe ne correspondent pas', 'error');
+                return;
+            }
+            
+            showLoading('Création du compte...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentToken = data.access_token;
+                    currentUser = data.username;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('golv_token', currentToken);
+                    localStorage.setItem('golv_user', currentUser);
+                    
+                    hideModal('registerModal');
+                    showToast('Compte créé', `Bienvenue ${currentUser}!`, 'success');
+                    loadDashboard();
+                } else {
+                    const error = await response.json();
+                    showToast('Erreur d\'inscription', error.detail || 'Nom d\'utilisateur déjà pris', 'error');
+                }
+            } catch (error) {
+                showToast('Erreur', 'Impossible de créer le compte', 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function loadVMs() {
+            if (!currentToken) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vms?public_only=false`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    userVMs = data.data || [];
+                    
+                    updateVMsDisplay();
+                    updateVMSelect();
+                    
+                    // Update stats
+                    document.getElementById('totalVMs').textContent = userVMs.length;
+                    document.getElementById('totalVMsStat').textContent = userVMs.length;
+                    
+                    // Count running VMs
+                    const runningVMs = userVMs.filter(vm => vm.status === 'running').length;
+                    document.getElementById('runningVMs').textContent = runningVMs;
+                    document.getElementById('runningVMsStat').textContent = runningVMs;
+                    
+                    // Select first VM if none selected
+                    if (!currentVM && userVMs.length > 0) {
+                        currentVM = userVMs[0].id;
+                        localStorage.setItem('golv_vm', currentVM);
+                        updateTerminalPrompt();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading VMs:', error);
+            }
+        }
+
+        async function createVM(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('vmName').value;
+            const type = document.getElementById('vmType').value;
+            const version = document.getElementById('vmVersion').value;
+            const isPublic = document.getElementById('vmPublic').checked;
+            
+            showLoading('Création de la VM...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vms`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        vm_type: type,
+                        version: version,
+                        is_public: isPublic,
+                        tags: ['web-created']
+                    })
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    hideModal('createVMModal');
+                    showToast('VM créée', `VM ${data.vm_id} créée avec succès!`, 'success');
+                    
+                    // Reset form
+                    document.getElementById('createVMForm').reset();
+                    
+                    // Reload VMs
+                    loadVMs();
+                } else {
+                    const error = await response.json();
+                    showToast('Erreur', error.detail || 'Erreur de création', 'error');
+                }
+            } catch (error) {
+                showToast('Erreur', 'Impossible de créer la VM', 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function executeCommand() {
+            const command = document.getElementById('terminalInput').value.trim();
+            if (!command || !currentVM) return;
+            
+            // Clear input
+            document.getElementById('terminalInput').value = '';
+            
+            // Add command to terminal
+            addTerminalOutput(`$ ${command}`, 'command');
+            
+            showLoading('Exécution de la commande...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vms/${currentVM}/execute`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        command: command,
+                        timeout: 30,
+                        user: 'root'
+                    })
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Add to history
+                    commandHistory.push({
+                        command: command,
+                        result: data,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    updateCommandHistory();
+                    updateStats();
+                    
+                    // Show result in terminal
+                    if (data.success) {
+                        if (data.data.stdout) {
+                            addTerminalOutput(data.data.stdout, 'success');
+                        }
+                    } else {
+                        if (data.data.error) {
+                            addTerminalOutput(data.data.error, 'error');
+                        }
+                        if (data.data.stderr) {
+                            addTerminalOutput(data.data.stderr, 'error');
+                        }
+                    }
+                    
+                    // Update commands executed stat
+                    document.getElementById('commandsExecuted').textContent = 
+                        parseInt(document.getElementById('commandsExecuted').textContent) + 1;
+                } else {
+                    const error = await response.json();
+                    addTerminalOutput(`Erreur: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                addTerminalOutput(`Erreur réseau: ${error.message}`, 'error');
+            }
+            
+            hideLoading();
+        }
+
+        async function runPredefinedCommand(commandType) {
+            if (!currentVM) {
+                showToast('Erreur', 'Veuillez sélectionner une VM', 'error');
+                return;
+            }
+            
+            addTerminalOutput(`$ [PREDEFINED] ${commandType}`, 'command');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vms/${currentVM}/execute/predefined`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(commandType)
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Add to history
+                    commandHistory.push({
+                        command: `[PREDEFINED] ${commandType}`,
+                        result: data,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    updateCommandHistory();
+                    
+                    if (data.success && data.data.stdout) {
+                        addTerminalOutput(data.data.stdout, 'success');
+                    }
+                }
+            } catch (error) {
+                addTerminalOutput(`Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadApiKeys() {
+            if (!currentToken) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/api-keys`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateApiKeysDisplay(data.data || []);
+                }
+            } catch (error) {
+                console.error('Error loading API keys:', error);
+            }
+        }
+
+        async function generateApiKey(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('apiKeyName').value;
+            const expires = document.getElementById('apiKeyExpires').value;
+            const permissions = Array.from(document.querySelectorAll('input[name="permissions"]:checked'))
+                                   .map(cb => cb.value);
+            
+            showLoading('Génération de la clé API...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/api-key/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        permissions: permissions,
+                        expires_in: parseInt(expires)
+                    })
+                });
+                
+                apiCalls++;
+                updateStats();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    hideModal('generateApiKeyModal');
+                    
+                    // Show API key to user (this is the only time it will be visible)
+                    showApiKeyModal(data.api_key, name);
+                    
+                    // Reset form
+                    document.getElementById('generateApiKeyForm').reset();
+                    
+                    // Reload API keys
+                    loadApiKeys();
+                } else {
+                    const error = await response.json();
+                    showToast('Erreur', error.detail || 'Erreur de génération', 'error');
+                }
+            } catch (error) {
+                showToast('Erreur', 'Impossible de générer la clé API', 'error');
+            }
+            
+            hideLoading();
+        }
+
+        // UI Functions
+        function showAuthSection() {
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('usernameDisplay').textContent = 'Non connecté';
+        }
+
+        function loadDashboard() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'grid';
+            document.getElementById('usernameDisplay').textContent = currentUser;
+            document.getElementById('userInfo').textContent = currentUser;
+            
+            // Load user data
+            loadVMs();
+            loadApiKeys();
+            updateCommandHistory();
+            updateStats();
+            updateTerminalPrompt();
+        }
+
+        function logout() {
+            currentToken = '';
+            currentUser = '';
+            currentVM = '';
+            
+            localStorage.removeItem('golv_token');
+            localStorage.removeItem('golv_user');
+            localStorage.removeItem('golv_vm');
+            
+            showToast('Déconnexion', 'Vous avez été déconnecté', 'info');
+            showAuthSection();
+        }
+
+        function updateVMsDisplay() {
+            const container = document.getElementById('vmListContainer');
+            
+            if (userVMs.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-server fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">Aucune VM trouvée</p>
+                        <button class="btn btn-golv btn-sm" onclick="showCreateVMModal()">
+                            <i class="fas fa-plus"></i> Créer une VM
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            userVMs.forEach(vm => {
+                const isActive = vm.id === currentVM;
+                const statusClass = vm.status === 'running' ? 'vm-status-running' : 'vm-status-stopped';
+                
+                html += `
+                    <div class="vm-item ${isActive ? 'active' : ''}" 
+                         onclick="selectVM('${vm.id}')">
+                        <div>
+                            <span class="vm-status ${statusClass}"></span>
+                            <strong>${vm.name}</strong>
+                            <small class="text-muted d-block">${vm.vm_type} ${vm.version}</small>
+                        </div>
+                        <div>
+                            <span class="badge ${vm.is_public ? 'bg-info' : 'bg-secondary'}">
+                                ${vm.is_public ? 'Public' : 'Privé'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateVMSelect() {
+            const select = document.getElementById('vmSelect');
+            select.innerHTML = '<option value="">Sélectionnez une VM</option>';
+            
+            userVMs.forEach(vm => {
+                const option = document.createElement('option');
+                option.value = vm.id;
+                option.textContent = `${vm.name} (${vm.vm_type})`;
+                if (vm.id === currentVM) option.selected = true;
+                select.appendChild(option);
+            });
+            
+            select.onchange = function() {
+                selectVM(this.value);
+            };
+        }
+
+        function selectVM(vmId) {
+            currentVM = vmId;
+            localStorage.setItem('golv_vm', vmId);
+            updateTerminalPrompt();
+            
+            // Update UI
+            updateVMsDisplay();
+            document.getElementById('vmSelect').value = vmId;
+            
+            showToast('VM sélectionnée', 'Terminal prêt pour cette VM', 'success');
+        }
+
+        function updateTerminalPrompt() {
+            const vm = userVMs.find(v => v.id === currentVM);
+            const prompt = vm ? `golv:${vm.name}$` : '$';
+            document.getElementById('terminalPrompt').textContent = prompt;
+        }
+
+        function addTerminalOutput(text, type = 'normal') {
+            const terminal = document.getElementById('terminalOutput');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            
+            if (type === 'command') {
+                line.innerHTML = `<span class="terminal-command">${text}</span>`;
+            } else if (type === 'error') {
+                line.innerHTML = `<span class="terminal-error">${text}</span>`;
+            } else if (type === 'success') {
+                line.innerHTML = `<span class="terminal-success">${text}</span>`;
+            } else {
+                line.textContent = text;
+            }
+            
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function handleTerminalKeyPress(event) {
+            if (event.key === 'Enter') {
+                executeCommand();
+            }
+        }
+
+        function updateCommandHistory() {
+            const container = document.getElementById('commandHistory');
+            
+            if (commandHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-history"></i> Aucune commande exécutée
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            commandHistory.slice(-10).reverse().forEach((item, index) => {
+                const time = new Date(item.timestamp).toLocaleTimeString();
+                const success = item.result?.success;
+                
+                html += `
+                    <div class="vm-item">
+                        <div>
+                            <code>${item.command}</code>
+                            <small class="text-muted d-block">${time}</small>
+                        </div>
+                        <div>
+                            <span class="badge ${success ? 'bg-success' : 'bg-danger'}">
+                                ${success ? '✓' : '✗'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateApiKeysDisplay(keys) {
+            const container = document.getElementById('apiKeysList');
+            
+            if (!keys || keys.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-key"></i> Aucune clé API
+                        <p class="mt-2">
+                            <button class="btn btn-golv btn-sm" onclick="showGenerateApiKeyModal()">
+                                Générer une clé
+                            </button>
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            keys.forEach(key => {
+                const expires = key.expires_at ? new Date(key.expires_at).toLocaleDateString() : 'Jamais';
+                
+                html += `
+                    <div class="vm-item">
+                        <div>
+                            <strong>${key.name}</strong>
+                            <small class="text-muted d-block">
+                                Créée: ${new Date(key.created_at).toLocaleDateString()}
+                            </small>
+                        </div>
+                        <div>
+                            <span class="badge ${key.is_active ? 'bg-success' : 'bg-secondary'}">
+                                ${key.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            <small class="d-block text-muted">Expire: ${expires}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateStats() {
+            document.getElementById('apiCalls').textContent = apiCalls;
+            document.getElementById('commandsExecuted').textContent = commandHistory.length;
+            document.getElementById('serverUrl').textContent = API_BASE_URL;
+        }
+
+        function refreshStats() {
+            loadVMs();
+            loadApiKeys();
+            showToast('Rafraîchissement', 'Statistiques mises à jour', 'info');
+        }
+
+        function testConnection() {
+            showLoading('Test de connexion...');
+            
+            setTimeout(() => {
+                checkApiStatus();
+                hideLoading();
+            }, 1000);
+        }
+
+        function showApiDocs() {
+            window.open(`${API_BASE_URL}/docs`, '_blank');
+        }
+
+        // Modal Functions
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').classList.add('active');
+        }
+
+        function showCreateVMModal() {
+            document.getElementById('createVMModal').classList.add('active');
+        }
+
+        function showGenerateApiKeyModal() {
+            document.getElementById('generateApiKeyModal').classList.add('active');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showApiKeyModal(apiKey, name) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal">
+                    <h4><i class="fas fa-key"></i> Clé API générée</h4>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Attention!</strong> Cette clé ne sera affichée qu'une seule fois.
+                        Copiez-la et conservez-la dans un endroit sûr.
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom: ${name}</label>
+                        <input type="text" class="form-control" value="${apiKey}" readonly>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-golv" onclick="copyToClipboard('${apiKey}')">
+                            <i class="fas fa-copy"></i> Copier la clé
+                        </button>
+                        <button class="btn btn-golv-outline" onclick="this.closest('.modal-overlay').remove()">
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Utility Functions
+        function showLoading(message = 'Chargement...') {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.querySelector('div:nth-child(2)').textContent = message;
+            overlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }, 500);
+        }
+
+        function showToast(title, message, type = 'info') {
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            
+            Toastify({
+                text: `<strong>${title}</strong><br>${message}`,
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: colors[type],
+                escapeMarkup: false
+            }).showToast();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => showToast('Copié', 'Texte copié dans le presse-papier', 'success'))
+                .catch(() => showToast('Erreur', 'Impossible de copier', 'error'));
+        }
+
+        function toggleTheme() {
+            const theme = document.body.getAttribute('data-theme');
+            const icon = document.getElementById('themeIcon');
+            
+            if (theme === 'dark') {
+                document.body.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('golv_theme', 'light');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('golv_theme', 'dark');
+            }
+        }
+
+        function switchTerminalTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // TODO: Implement tab switching
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('golv_theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').className = 'fas fa-sun';
+        }
+    </script>
+</body>
+                                 </html>
