@@ -1,72 +1,58 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+from golv import GoLVSetup, VMType, CommandSecurityLevel
 
-from golv import GoLVSetup, VMType, CommandSecurityLevel, SecurityError
+# ----------------------------------------
+# ⚡ CONFIGURATION : Remplace par ton token
+# ----------------------------------------
+API_KEY = "eyJhbGciOiJIUzI1NiIsInVzZXJfaWQiOjUsInJvbGUiOiJ1c2VyIiwiZXhwIjoxNzY2NzE0NTM0fQ.C8doXu3PsSnzxrD65hcONwTF2Idh9-gV_zYdPXjINUw"
 
 def main():
     print("🚀 Initialisation du SDK GoLV...")
+    setup = GoLVSetup(api_key=API_KEY)
+    print(f"SDK Setup: {setup}")
 
-    # ---------- INITIALISATION ----------
-    setup = GoLVSetup()
-    print("SDK Setup:", setup)
+    # Création d'une VM de test
+    vm_config = setup.create_default_vm("test-vm")
+    print(f"VMConfig: {vm_config}")
 
     client = setup.get_client()
-    print("Client OK:", client)
-
-    # ---------- CRÉATION DE VM ----------
-    vm_config = setup.create_vm_config(
-        name="test-vm",
-        vm_type=VMType.PYTHON_DEV
-    )
-    print("VMConfig:", vm_config)
 
     try:
         vm_data = client.create_vm(vm_config)
-        vm_id = vm_data.get("vm_id")
-        print(f"✅ VM créée avec ID: {vm_id}")
+        print(f"✅ VM créée: {vm_data}")
     except Exception as e:
-        print(f"Erreur création VM: {e}")
-        vm_id = None
+        print(f"❌ Erreur création VM: {e}")
+        return
 
-    # ---------- CRÉATION AGENT ----------
+    # Création d'un agent sécurisé
     agent = setup.create_agent(
         vm_config=vm_config,
-        allowed_commands=["echo", "python", "git"],
-        max_command_length=100
+        allowed_commands=["echo", "python", "git"]
     )
-    print("Agent GoLV créé:", agent)
+    print(f"Agent initialisé: {agent}")
 
-    # ---------- TEST COMMANDE ECHO ----------
-    try:
-        result = agent.execute("echo 'Hello GoLV'")
-        print("Commande echo output:", result.output)
-    except SecurityError as se:
-        print("Erreur sécurité:", se)
+    # Test commande echo
+    print("\n💬 Test commande echo")
+    result = agent.execute("echo 'Hello GoLV'")
+    print(result.output)
 
-    # ---------- TEST COMMANDE PYTHON ----------
-    python_code = "print('Hello from Python inside VM')"
-    result = agent.execute_python(python_code)
-    print("Commande Python output:", result.output)
+    # Test exécution Python
+    print("\n💻 Test commande Python")
+    python_code = 'print("Hello from Python in VM")'
+    result_py = agent.execute_python(python_code)
+    print(result_py.output)
 
-    # ---------- TEST COMMANDE INTERDITE ----------
-    try:
-        agent.execute("rm -rf /")  # devrait déclencher SecurityError
-    except SecurityError as se:
-        print("SecurityError détectée comme attendu:", se)
+    # Test exécution Git (si autorisé)
+    if "git" in agent.config.allowed_commands:
+        print("\n🌿 Test commande Git")
+        result_git = agent.execute_git("status")
+        print(result_git.output)
+    else:
+        print("\n⚠️ Commandes Git non autorisées")
 
-    # ---------- TEST STATUT VM ----------
-    if vm_id:
-        status = agent.get_status()
-        print("Statut VM:", status)
-
-    # ---------- TEST COMMANDE PREDEFINIE ----------
-    try:
-        predef_result = agent.predefined("list_files")
-        print("Commande prédéfinie output:", predef_result.output)
-    except Exception as e:
-        print("Erreur commande prédéfinie:", e)
-
-    print("✅ Tous les tests sont terminés.")
+    # Récupérer le statut de la VM
+    print("\n📊 Statut VM")
+    status = agent.get_status()
+    print(status)
 
 if __name__ == "__main__":
     main()
