@@ -28,7 +28,7 @@ Il permet de créer, configurer et exécuter des commandes sur des VMs distantes
 
 # Cloner le repo
 ```bash
-git clone https://github.com/MauricioKk-ship-it/GoLV-VM.git
+git clone https://github.com/gopu-inc/GoLV-VM.git
 cd GoLV-VM
 
 # Installer en mode editable
@@ -44,7 +44,7 @@ pip install golv
 # 🧰 Usage
 
 Initialisation du SDK
-
+```python
 from golv import GoLVSetup, VMType
 
 # Initialiser le SDK
@@ -87,7 +87,7 @@ try:
 except Exception as e:
     print("Sécurité:", e)
 
-
+```
 ---
 
 # 📊 Structure du SDK
@@ -118,9 +118,9 @@ Agent isolé et sécurisé pour exécution IA
 ---
 
 # 🧪 Tests
-
+```bash
 python test_golv_sdk.py
-
+```
 Ce script teste :
 
 Création de VM
