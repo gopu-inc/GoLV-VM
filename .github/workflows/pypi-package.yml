@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # autorise le push
+
 
     steps:
       - name: Checkout repository
@@ -27,13 +30,13 @@ jobs:
       - name: Build package
         run: python -m build
 
-      - name: Commit build artifacts
+      - name: Push artifacts
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist/
-          git commit -m "Add built distributions for ${{ github.ref_name }}"
-          git push origin HEAD:${{ github.ref_name }}
+             git config user.name "github-actions[bot]"
+             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+             git add dist/
+             git commit -m "Add built distributions for ${{ github.ref_name }}"
+             git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/gopu-inc/GoLV-VM.git HEAD:${{ github.ref_name }}
 
       - name: Publish to PyPI
         env:
