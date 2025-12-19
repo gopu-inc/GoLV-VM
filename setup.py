@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="golv",
-    version="1.0.0",
+    version="1.1.0",
     author="GOPU.inc",
     author_email="ceoseshell@gmail.com",
     description="SDK Python pour GoLV - Terminal sécurisé pour IA",
@@ -42,7 +42,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "golv=setup_golv:main",
+            "golv=main_golv:main",
         ],
     },
 )
