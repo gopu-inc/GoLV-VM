@@ -31,7 +31,21 @@ class VMConfig:
     def __post_init__(self):
         if not self.name and self.vm_id:
             self.name = f"VM-{self.vm_id[:8]}"
+@dataclass
+class CommandRequest:
+    """Représente une commande à envoyer"""
+    command: str
+    vm_id: Optional[str] = None
+    timeout: int = 30
+    working_dir: Optional[str] = None
 
+@dataclass
+class VMStatus:
+    """Statut de la VM"""
+    vm_id: str
+    status: str
+    uptime: Optional[str] = None
+    ip_address: Optional[str] = None
 @dataclass
 class CommandResult:
     """Résultat d'exécution de commande"""

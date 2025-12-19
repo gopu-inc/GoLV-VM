@@ -1,3 +1,4 @@
+import golv
 from golv import GoLVAgent, AgentConfig, VMConfig
 from langchain.agents import Tool, AgentExecutor, create_react_agent
 from langchain.llms import OpenAI

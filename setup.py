@@ -4,10 +4,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="golv-py",
+    name="golv",
     version="1.0.0",
-    author="GoLV Team",
-    author_email="contact@golv.io",
+    author="GOPU.inc",
+    author_email="ceoseshell@gmail.com",
     description="SDK Python pour GoLV - Terminal sécurisé pour IA",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -27,7 +27,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "requests>=2.28.0",
-        "pydantic>=2.0.0",
+        "pydantic>=1.10,<2.0",
     ],
     extras_require={
         "dev": [
@@ -42,7 +42,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "golv-agent=golv.cli:main",
+            "golv=setup_golv:main",
         ],
     },
 )

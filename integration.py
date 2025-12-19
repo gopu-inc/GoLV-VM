@@ -1,3 +1,4 @@
+import golv
 from golv import GoLVAgent, AgentConfig, VMConfig, CommandSecurityLevel
 
 # Configuration comme vous l'avez décrit
