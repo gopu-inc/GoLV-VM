@@ -3,7 +3,7 @@ name: Publish PyPI
 on:
   push:
     tags:
-      - 'v0.1.1'  # Publie uniquement sur les tags de version
+      - 'v0.1.1'  # P ublie uniquement sur les tags de version
 
 jobs:
   publish:
