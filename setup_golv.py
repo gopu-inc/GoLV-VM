@@ -2,7 +2,7 @@
 """
 Script de configuration automatique pour GoLV
 """
-
+import golv
 import argparse
 import sys
 from pathlib import Path
