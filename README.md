@@ -2,7 +2,7 @@
 
 # 🚀 GoLV-VM
 
-[![PyPI Version](https://img.shields.io/pypi/v/golv?color=blue&label=PyPI)](https://pypi.org/project/golv-py/)
+[![PyPI Version](https://img.shields.io/pypi/v/golv?color=blue&label=PyPI)](https://pypi.org/project/golv/)
 [![Python Version](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/MauricioKk-ship-it/GoLV-VM/python-package.yml?branch=main&label=build&logo=github)](https://github.com/MauricioKk-ship-it/GoLV-VM/actions)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
