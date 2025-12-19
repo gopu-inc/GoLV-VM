@@ -4,7 +4,7 @@
 [![Vercel Deployment](https://img.shields.io/badge/vercel-appGoLV-blue?logo=vercel)](https://vercel.com/mauricio-100s-projects/golvcloud/HUH6zJsuxbyoxNbRkHLFTtjPf8an)
 [![PyPI Version](https://img.shields.io/pypi/v/golv?color=blue&label=PyPI)](https://pypi.org/project/golv/)
 [![Python Version](https://img.shields.io/badge/python-3.12-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/MauricioKk-ship-it/GoLV-VM/python-package.yml?branch=main&label=build&logo=github)](https://github.com/MauricioKk-ship-it/GoLV-VM/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/MauricioKk-ship-it/GoLV-VM/pypi-package.yml?branch=main&label=build&logo=github)](https://github.com/MauricioKk-ship-it/GoLV-VM/actions)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)]()
 
