@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Configuration automatique
 try:
-    from golv_setup import GoLVSetup
+    from golv import GoLVSetup
     from golv import GoLVAgent
     
     def get_golv_agent():
