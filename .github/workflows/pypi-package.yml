@@ -2,8 +2,8 @@ name: Publish PyPI and bump tag
 
 on:
   push:
-    tags:
-      - 'v0.2.6'   # Déclenche sur tous les tags de version
+    branches:
+      - main # Déclenche sur tous les tags de version
 
 permissions:
   contents: write   # Autorise le push vers le dépôt
