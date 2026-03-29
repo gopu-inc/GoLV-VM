@@ -1,7 +1,7 @@
 from golv import GoLVSetup, VMType, CommandSecurityLevel
 
 # ----------------------------------------
-# ⚡ CONFIGURATION : Remplace par ton token
+# ⚡ CONFIGURATION : pour l'auth sécuriser 
 # ----------------------------------------
 API_KEY = "eyJhbGciOiJIUzI1NiIsInVzZXJfaWQiOjUsInJvbGUiOiJ1c2VyIiwiZXhwIjoxNzY2NzE0NTM0fQ.C8doXu3PsSnzxrD65hcONwTF2Idh9-gV_zYdPXjINUw"
 
